@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulateur LRM</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand: #0f3f68;
+      --brand-mid: #1a5a96;
+      --accent: #0374d8;
+      --accent-hover: #025fb8;
+      --bg: #eef2f7;
+      --surface: #ffffff;
+      --border: #ccd8e8;
+      --border-focus: #0374d8;
+      --text-primary: #0D1B2A;
+      --text-secondary: #4a5f74;
+      --text-hint: #8fa3b8;
+      --input-bg: #f5f8fc;
+      --radius: 10px;
+      --radius-sm: 6px;
+      --shadow: 0 1px 3px rgba(15,63,104,0.08), 0 4px 16px rgba(15,63,104,0.06);
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: white;
+      border-bottom: 3px solid var(--accent);
+      padding: 0 28px;
+      height: 68px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .header-logo img {
+      height: 40px;
+      width: auto;
+      display: block;
+    }
+    .header-divider {
+      width: 1px;
+      height: 28px;
+      background: rgba(255,255,255,0.25);
+    }
+    .header-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: black;
+      letter-spacing: -0.01em;
+    }
+
+    /* ── Page layout ── */
+    .page {
+      max-width: 900px;
+      margin: 32px auto;
+      padding: 0 16px 48px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-section {
+      padding: 24px 28px;
+      border-bottom: 1px solid var(--border);
+    }
+    .card-section:last-child { border-bottom: none; }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Grid ── */
+    .grid { display: grid; gap: 16px; }
+    .grid-2 { grid-template-columns: repeat(2, 1fr); }
+    .grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .grid-4 { grid-template-columns: repeat(4, 1fr); }
+    .col-span-2 { grid-column: span 2; }
+    .col-span-3 { grid-column: span 3; }
+
+    /* ── Fields ── */
+    .field { display: flex; flex-direction: column; gap: 6px; }
+
+    .field label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .field input,
+    .field select {
+      height: 40px;
+      padding: 0 12px;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--text-primary);
+      width: 100%;
+      transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    .field input::placeholder { color: var(--text-hint); }
+    .field input:hover,
+    .field select:hover { border-color: #b0bec5; }
+    .field input:focus,
+    .field select:focus {
+      outline: none;
+      border-color: var(--border-focus);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(3,116,255,0.12);
+    }
+
+    /* custom select arrow */
+    .field select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239AAAB8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+      cursor: pointer;
+    }
+
+    /* ── Two-column layout for patient + orientation ── */
+    .top-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+    .top-col {
+      padding: 24px 28px;
+    }
+    .top-col:first-child {
+      border-right: 1px solid var(--border);
+    }
+
+    /* ── Footer / action bar ── */
+    .card-footer {
+      padding: 20px 28px;
+      display: flex;
+      justify-content: flex-end;
+      background: #eef2f7;
+      border-top: 1px solid var(--border);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 100px;
+      padding: 0 28px;
+      height: 42px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.15s, transform 0.1s;
+      letter-spacing: 0.01em;
+    }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary svg { width: 16px; height: 16px; }
+
+    /* ── Responsive ── */
+    @media (max-width: 680px) {
+      .page { margin: 16px auto; }
+      .top-grid { grid-template-columns: 1fr; }
+      .top-col:first-child { border-right: none; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .grid-3 { grid-template-columns: 1fr 1fr; }
+      .grid-4 { grid-template-columns: 1fr 1fr; }
+      .col-span-2 { grid-column: span 1; }
+      .col-span-3 { grid-column: span 2; }
+      .card-section { padding: 20px 16px; }
+      .top-col { padding: 20px 16px; }
+      .card-footer { padding: 16px; }
+    }
+
+    @media (max-width: 420px) {
+      .grid-3 { grid-template-columns: 1fr; }
+      .grid-4 { grid-template-columns: 1fr; }
+      .col-span-3 { grid-column: span 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-logo">
+      <img src="https://esante.gouv.fr/sites/default/files/logo-ANS.png" alt="Agence du Numérique en Santé" />
+      <div class="header-divider"></div>
+      <span class="header-title">Simulateur LRM</span>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="card">
+
+      <!-- Patient + Orientation -->
+      <div class="top-grid">
+
+        <!-- Patient info -->
+        <div class="top-col">
+          <p class="section-label">Informations patient</p>
+          <div class="grid grid-2" style="margin-bottom: 16px;">
+            <div class="field">
+              <label>Nom</label>
+              <input id="npt_patient_name" placeholder="Dupont" />
+            </div>
+            <div class="field">
+              <label>Prénom</label>
+              <input id="npt_patient_firstname" placeholder="Jean" />
+            </div>
+          </div>
+          <div class="grid grid-2" style="margin-bottom: 16px;">
+            <div class="field">
+              <label>Sexe</label>
+              <select id="npt_patient_sex">
+                <option value="M">Masculin</option>
+                <option value="F">Féminin</option>
+                <option value="U">Indéterminé</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Date de naissance</label>
+              <input type="date" id="npt_patient_birthdate" />
+            </div>
+          </div>
+          <div class="grid grid-2">
+            <div class="field col-span-2">
+              <label>Téléphone</label>
+              <input id="npt_patient_phone" placeholder="06 xx xx xx xx" value="06 77 10 55 25" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Orientation -->
+        <div class="top-col">
+          <p class="section-label">Décision d'orientation</p>
+          <div class="field" style="margin-bottom: 16px;">
+            <label>Spécialité</label>
+            <select id="npt_specialty">
+              <option value="SM54">Médecine générale</option>
+              <option value="INF">Infirmier</option>
+            </select>
+          </div>
+
+          <p class="section-label" style="margin-top: 24px;">Médecin traitant</p>
+          <div class="grid grid-2">
+            <div class="field">
+              <label>Nom MT</label>
+              <input id="npt_practioner_name" placeholder="Nom" value="Dafei" />
+            </div>
+            <div class="field">
+              <label>Prénom MT</label>
+              <input id="npt_practioner_firstname" placeholder="Prénom" value="Farid" />
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Address -->
+      <div class="card-section">
+        <p class="section-label">Adresse PATIENT</p>
+        <div class="grid grid-4">
+          <div class="field">
+            <label>N°</label>
+            <input id="npt_street_number" placeholder="N°" value="4" />
+          </div>
+          <div class="field col-span-2">
+            <label>Voie</label>
+            <input id="npt_street_name" placeholder="Rue, avenue…" value="Rue de la poste" />
+          </div>
+          <div class="field">
+            <label>Code postal</label>
+            <input id="npt_zipcode" placeholder="00000" value="33330" />
+          </div>
+          <div class="field col-span-3">
+            <label>Ville</label>
+            <input id="npt_city" placeholder="Ville" value="Saint-Sulpice-de-Faleyrens" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="card-footer">
+        <button class="btn-primary" id="search_button" onclick="openSearchUrl()">
+          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="7" cy="7" r="4.5" stroke="white" stroke-width="1.5"/>
+            <path d="M10.5 10.5L13 13" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          Rechercher sur la plateforme numérique du SAS
+        </button>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    const BASE_URL = "https://sas.preproduction.santefr.esante.gouv.fr/sas/recherche";
+    const PRACTITIONER_OID = "urn:oid:1.2.250.1.71.4.2.1|810002725272";
+    const SPECIALTY_OID_PREFIX = "urn:oid:1.2.250.1.213.2.28|";
+
+    function val(id) {
+      return document.getElementById(id)?.value?.trim() || "";
+    }
+
+    function buildUrl() {
+      const specialty = val("npt_specialty");
+      const city = val("npt_city");
+      const streetname = [val("npt_street_number"), val("npt_street_name")]
+        .filter(Boolean).join(" ");
+
+      const params = new URLSearchParams({
+        practitioner: PRACTITIONER_OID,
+        specialty: SPECIALTY_OID_PREFIX + specialty,
+        city,
+        streetname,
+        origin: "DemoANS"
+      });
+
+      return `${BASE_URL}?${params.toString()}`;
+    }
+
+    function openSearchUrl() {
+      window.open(buildUrl(), "_blank");
+    }
+  </script>
+
+</body>
+</html>
