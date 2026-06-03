@@ -1,5 +1,5 @@
 const BASE_URL = "https://sas.sante.fr/sas/recherche";
-const PRACTITIONER_OID = "urn:oid:1.2.250.1.71.4.2.1|810002725272";
+const PRACTITIONER_OID = "urn:oid:1.2.250.1.71.4.2.1|810002814092";
 const SPECIALTY_OID_PREFIX = "urn:oid:1.2.250.1.213.2.28|";
 
 function val(id) {
